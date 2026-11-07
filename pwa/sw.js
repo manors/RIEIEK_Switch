@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rieiek-switch-v1.0.0';
+const CACHE_NAME = 'rieiek-switch-v1.1.0';
 
 // 预缓存资源列表（全部使用相对路径以适配 GitHub Pages 任意二级子目录）
 const PRECACHE_ASSETS = [

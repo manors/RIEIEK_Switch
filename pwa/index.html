@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>RIEIEK 设备监控仪表盘</title>
+  <title>RIEIEK 智能电瓶断电开关</title>
   
   <!-- PWA & 移动端相关元数据 -->
   <meta name="theme-color" content="#007aff">
-  <meta name="description" content="RIEIEK 蓝牙设备离线监控仪表盘">
+  <meta name="description" content="RIEIEK 智能电瓶断电开关蓝牙离线监控仪表盘">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -19,27 +19,28 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       padding: 16px;
       padding-top: calc(16px + env(safe-area-inset-top));
-      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+      padding-bottom: calc(90px + env(safe-area-inset-bottom));
       background: #f4f6f8;
       color: #333;
       max-width: 540px;
       margin: 0 auto;
       min-height: 100vh;
+      user-select: none;
     }
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       padding: 4px 2px;
     }
     .app-title {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: #1c1c1e;
       display: flex;
@@ -49,12 +50,28 @@
     .app-title svg {
       width: 24px;
       height: 24px;
+      flex-shrink: 0;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lang-btn {
+      background: #ffffff;
+      border: 1px solid #d1d1d6;
+      border-radius: 14px;
+      padding: 3px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #007aff;
+      cursor: pointer;
     }
     .badge {
       display: inline-flex;
       align-items: center;
       font-size: 12px;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 12px;
       font-weight: 500;
       gap: 5px;
@@ -62,35 +79,44 @@
     .badge-online { background: #e3f9e5; color: #1e7e34; }
     .badge-offline { background: #fee2e2; color: #dc2626; }
     .badge-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: currentColor;
     }
     .card {
       background: #ffffff;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1c1c1e;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .btn {
       background: #007aff;
       color: white;
       border: none;
-      padding: 14px 20px;
-      font-size: 16px;
+      padding: 12px 20px;
+      font-size: 15px;
       font-weight: 600;
       border-radius: 10px;
       width: 100%;
       cursor: pointer;
-      transition: background 0.2s, opacity 0.2s;
+      transition: all 0.2s;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 8px;
     }
-    .btn:active { opacity: 0.85; }
+    .btn:active { opacity: 0.85; transform: scale(0.99); }
     .btn:disabled { background: #b0c4de; cursor: not-allowed; opacity: 1; }
     .btn-secondary {
       background: #e5e5ea;
@@ -100,26 +126,233 @@
     .btn-install {
       background: #34c759;
       color: white;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       display: none;
     }
-    .status-text {
-      margin-top: 12px;
-      color: #666;
-      font-size: 14px;
-      word-break: break-all;
-      line-height: 1.4;
-    }
-    .metric {
+    .status-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      font-size: 13px;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    /* 电池主监控展示 */
+    .voltage-hero {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .voltage-num {
+      font-size: 38px;
+      font-weight: 800;
+      color: #1c1c1e;
+      font-variant-numeric: tabular-nums;
+    }
+    .voltage-unit {
+      font-size: 18px;
+      font-weight: 600;
+      color: #8e8e93;
+      margin-left: 2px;
+    }
+    .vol-pro-tag {
+      font-size: 16px;
+      font-weight: 700;
+      color: #007aff;
+    }
+    .battery-bar-container {
+      width: 100%;
+      height: 12px;
+      background: #e5e5ea;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .battery-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #34c759, #30d158);
+      width: 0%;
+      border-radius: 6px;
+      transition: width 0.4s ease;
+    }
+
+    /* 四宫格数据网格 */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .metric-cell {
+      background: #f7f8fa;
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+    .metric-cell-label {
+      font-size: 12px;
+      color: #8e8e93;
+      margin-bottom: 4px;
+    }
+    .metric-cell-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1c1c1e;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* 设置与滑块区域 */
+    .setting-item {
       padding: 12px 0;
       border-bottom: 1px solid #f0f0f2;
     }
-    .metric:last-child { border-bottom: none; }
-    .metric-label { font-size: 15px; color: #555; }
-    .val { font-weight: 700; font-size: 1.15em; color: #1c1c1e; }
+    .setting-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .setting-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .setting-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1c1c1e;
+    }
+    .setting-desc {
+      font-size: 12px;
+      color: #8e8e93;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+    .slider-container {
+      margin-top: 10px;
+    }
+    .slider-val-box {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+    .slider-val-now {
+      font-weight: 700;
+      color: #007aff;
+      font-size: 16px;
+    }
+    input[type=range] {
+      width: 100%;
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: #e5e5ea;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #007aff;
+      box-shadow: 0 2px 6px rgba(0,122,255,0.4);
+      cursor: pointer;
+    }
+
+    /* 原生 Switch 风格开关 */
+    .switch-wrap {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+    .switch-wrap input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #e5e5ea;
+      transition: .3s;
+      border-radius: 28px;
+    }
+    .switch-slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    input:checked + .switch-slider {
+      background-color: #34c759;
+    }
+    input:checked + .switch-slider:before {
+      transform: translateX(20px);
+    }
+
+    /* 底部固定三大操作按钮栏 */
+    .bottom-action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(0,0,0,0.08);
+      padding: 10px 16px;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      z-index: 100;
+    }
+    .bottom-action-inner {
+      max-width: 540px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 12px 6px;
+      border: 1px solid #d1d1d6;
+      background: #f2f2f7;
+      color: #3a3a3c;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+    }
+    .mode-btn:active {
+      transform: scale(0.96);
+    }
+    .mode-btn.active {
+      background: #007aff;
+      color: #ffffff;
+      border-color: #007aff;
+      box-shadow: 0 3px 8px rgba(0, 122, 255, 0.3);
+    }
+    .mode-btn.active-off {
+      background: #ff3b30;
+      color: #ffffff;
+      border-color: #ff3b30;
+      box-shadow: 0 3px 8px rgba(255, 59, 48, 0.3);
+    }
+
     .warning-box {
       background: #fff8e6;
       border: 1px solid #ffeeba;
@@ -128,15 +361,15 @@
       border-radius: 10px;
       font-size: 13px;
       line-height: 1.5;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       display: none;
     }
     footer {
       text-align: center;
       font-size: 12px;
       color: #8e8e93;
-      margin-top: 24px;
-      padding-bottom: 8px;
+      margin-top: 16px;
+      padding-bottom: 10px;
     }
   </style>
 </head>
@@ -150,11 +383,14 @@
         <path d="M165 160 A 130 130 0 1 0 347 160" stroke="#ffffff" stroke-width="36" stroke-linecap="round"/>
         <path d="M236 290 L276 325 L256 345 L256 265 L276 285 L236 320" stroke="#64d2ff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-      <span>RIEIEK 控制台</span>
+      <span id="txtMainTitle">智能电瓶断电开关</span>
     </div>
-    <div id="netBadge" class="badge badge-online">
-      <span class="badge-dot"></span>
-      <span id="netText">在线</span>
+    <div class="header-actions">
+      <button id="btnLang" class="lang-btn">English</button>
+      <div id="netBadge" class="badge badge-online">
+        <span class="badge-dot"></span>
+        <span id="netText">在线</span>
+      </div>
     </div>
   </header>
 
@@ -165,57 +401,248 @@
     📲 安装应用到主屏幕 (支持离线使用)
   </button>
 
+  <!-- 蓝牙连接与状态卡片 -->
   <div class="card">
     <button id="btnConnect" class="btn">扫描并连接设备</button>
-    <button id="btnDisconnect" class="btn btn-secondary" style="display: none;">断开连接</button>
-    <p id="status" class="status-text">状态: 未连接</p>
+    <button id="btnDisconnect" class="btn btn-secondary" style="display: none;">断开蓝牙连接</button>
+    <div class="status-row">
+      <span><span id="lblBleStatus">蓝牙状态:</span> <strong id="bleStatus">未连接</strong></span>
+      <span><span id="lblPowerState">接通状态:</span> <strong id="powerStatus">断开</strong></span>
+    </div>
   </div>
 
+  <!-- 电瓶状态主卡片 -->
   <div class="card" id="dataCard" style="display: none;">
-    <div class="metric"><span class="metric-label">电量百分比</span><span class="val" id="volPro">-- %</span></div>
-    <div class="metric"><span class="metric-label">当前电流</span><span class="val" id="current">-- A</span></div>
-    <div class="metric"><span class="metric-label">设备温度</span><span class="val" id="temp">-- ℃</span></div>
-    <div class="metric"><span class="metric-label">电源状态</span><span class="val" id="powerStatus">--</span></div>
-    <div class="metric"><span class="metric-label">无感启动</span><span class="val" id="autoOn">--</span></div>
-    <div class="metric"><span class="metric-label">自动断电</span><span class="val" id="autoOff">--</span></div>
+    <div class="card-title">
+      <span id="lblBatInfo">电瓶状态</span>
+      <span class="vol-pro-tag" id="volPro">-- %</span>
+    </div>
+    <div class="voltage-hero">
+      <div>
+        <span class="voltage-num" id="curVoltage">--</span>
+        <span class="voltage-unit">V</span>
+      </div>
+    </div>
+    <div class="battery-bar-container">
+      <div class="battery-bar-fill" id="batBar"></div>
+    </div>
+
+    <!-- 四宫格指标 -->
+    <div class="metric-grid">
+      <div class="metric-cell">
+        <div class="metric-cell-label" id="lblCur">实时电流:</div>
+        <div class="metric-cell-val" id="current">-- A</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-cell-label" id="lblStartCur">启动电流:</div>
+        <div class="metric-cell-val" id="startCur">-- A</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-cell-label" id="lblTemp">实时温度:</div>
+        <div class="metric-cell-val" id="temp">-- ℃</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-cell-label" id="lblStartVol">启动电压:</div>
+        <div class="metric-cell-val" id="startVol">-- V</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 参数配置卡片 -->
+  <div class="card" id="settingCard" style="display: none;">
+    <!-- 断电电压滑块 -->
+    <div class="setting-item">
+      <div class="setting-header">
+        <span class="setting-title" id="lblOffVol">断电电压:</span>
+        <span class="slider-val-now" id="offValText">12.0 V</span>
+      </div>
+      <div class="slider-container">
+        <input type="range" id="sliderOffVal" min="50" max="137" value="120">
+        <div class="slider-val-box" style="margin-top: 4px;">
+          <span id="sliderMinText">5.0 V</span>
+          <span id="sliderMaxText">13.7 V</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 自动断电开关 -->
+    <div class="setting-item">
+      <div class="setting-header">
+        <div>
+          <div class="setting-title" id="lblAutoOff">开启自动断电:</div>
+          <div class="setting-desc" id="lblAutoOffDesc">(开启后当电压低于设定值后，自动断开连接)</div>
+        </div>
+        <label class="switch-wrap">
+          <input type="checkbox" id="chkAutoOff">
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 开启无感连接开关 -->
+    <div class="setting-item">
+      <div class="setting-header">
+        <div>
+          <div class="setting-title" id="lblAutoOn">开启无感连接:</div>
+          <div class="setting-desc" id="lblAutoOnDesc">(开启后手机靠近、自动通电，需要配对好蓝牙)</div>
+        </div>
+        <label class="switch-wrap">
+          <input type="checkbox" id="chkAutoOn">
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部固定三大操作按钮栏 (通电 / 震动控制 / 断电) -->
+  <div class="bottom-action-bar" id="bottomActionBar" style="display: none;">
+    <div class="bottom-action-inner">
+      <button class="mode-btn" id="btn1">
+        <span id="txtBtn1">通电</span>
+      </button>
+      <button class="mode-btn" id="btn2">
+        <span id="txtBtn2">震动控制</span>
+      </button>
+      <button class="mode-btn" id="btn3">
+        <span id="txtBtn3">断电</span>
+      </button>
+    </div>
   </div>
 
   <footer>
-    RIEIEK PWA &bull; 支持断网离线打开与 Web 蓝牙通信
+    RIEIEK PWA &bull; 支持离线打开与 Web 蓝牙通信
   </footer>
 
 <script>
+// ==================== 国际化字典 (与 origin.js 保持一致) ====================
+const Chinese = {
+  a1: "智能电瓶断电开关",
+  a2: "蓝牙状态:",
+  a3: "正在连接",
+  a4: "接通状态:",
+  a5: "断开",
+  a6: "电瓶状态",
+  a7: "实时电流:",
+  a8: "启动电流:",
+  a9: "实时温度:",
+  a10: "启动电压:",
+  a11: "断电电压:",
+  a12: "开启自动断电:",
+  a13: "(开启后当电压低于设定值后，自动断开连接)",
+  a14: "开启无感连接:",
+  a15: "(开启后手机靠近、自动通电，需要配对好蓝牙)",
+  a16: "通电",
+  a17: "震动控制",
+  a18: "断电",
+  a19: "正在搜索",
+  b1: "将请求蓝牙权限以连接外围设备!",
+  b2: "蓝牙连接已断开",
+  b5: "正在同步数据...",
+  b6: "连接失败",
+  b7: "已连接",
+  b8: "接通",
+  b9: "断开",
+  scanConnect: "扫描并连接设备",
+  disconnect: "断开蓝牙连接",
+  offlineMode: "离线模式",
+  onlineMode: "在线",
+  installPrompt: "📲 安装应用到主屏幕 (支持离线使用)"
+};
+
+const English = {
+  a1: "Smart Battery Switch",
+  a2: "Bluetooth:",
+  a3: "Connecting...",
+  a4: "State:",
+  a5: "OFF",
+  a6: "Battery Info",
+  a7: "Current:",
+  a8: "StartCur:",
+  a9: "Temp:",
+  a10: "StartVol:",
+  a11: "Off Voltage:",
+  a12: "Auto Power Off:",
+  a13: "(Voltage is below the set value, will power off)",
+  a14: "Auto Power On:",
+  a15: "(Bluetooth connected, will power on)",
+  a16: "ON",
+  a17: "Sway",
+  a18: "OFF",
+  a19: "Searching",
+  b1: "Requesting Bluetooth permission!",
+  b2: "Bluetooth disconnected",
+  b5: "Syncing data...",
+  b6: "Connection failed",
+  b7: "Connected",
+  b8: "ON",
+  b9: "OFF",
+  scanConnect: "Scan & Connect Device",
+  disconnect: "Disconnect Bluetooth",
+  offlineMode: "Offline",
+  onlineMode: "Online",
+  installPrompt: "📲 Install to Home Screen (Offline Ready)"
+};
+
+let currentLang = localStorage.getItem('rieiek_lang') || 'Chinese';
+let disInfo = currentLang === 'Chinese' ? Chinese : English;
+
+function applyLanguage() {
+  document.getElementById('txtMainTitle').innerText = disInfo.a1;
+  document.getElementById('lblBleStatus').innerText = disInfo.a2;
+  document.getElementById('lblPowerState').innerText = disInfo.a4;
+  document.getElementById('lblBatInfo').innerText = disInfo.a6;
+  document.getElementById('lblCur').innerText = disInfo.a7;
+  document.getElementById('lblStartCur').innerText = disInfo.a8;
+  document.getElementById('lblTemp').innerText = disInfo.a9;
+  document.getElementById('lblStartVol').innerText = disInfo.a10;
+  document.getElementById('lblOffVol').innerText = disInfo.a11;
+  document.getElementById('lblAutoOff').innerText = disInfo.a12;
+  document.getElementById('lblAutoOffDesc').innerText = disInfo.a13;
+  document.getElementById('lblAutoOn').innerText = disInfo.a14;
+  document.getElementById('lblAutoOnDesc').innerText = disInfo.a15;
+  document.getElementById('txtBtn1').innerText = disInfo.a16;
+  document.getElementById('txtBtn2').innerText = disInfo.a17;
+  document.getElementById('txtBtn3').innerText = disInfo.a18;
+  document.getElementById('btnConnect').innerText = disInfo.scanConnect;
+  document.getElementById('btnDisconnect').innerText = disInfo.disconnect;
+  document.getElementById('btnInstall').innerText = disInfo.installPrompt;
+  document.getElementById('btnLang').innerText = currentLang === 'Chinese' ? 'English' : '中文';
+  updateNetworkStatus();
+  updateScreen();
+}
+
+document.getElementById('btnLang').addEventListener('click', () => {
+  currentLang = currentLang === 'Chinese' ? 'English' : 'Chinese';
+  localStorage.setItem('rieiek_lang', currentLang);
+  disInfo = currentLang === 'Chinese' ? Chinese : English;
+  applyLanguage();
+});
+
 // ==================== PWA Service Worker 注册与离线检测 ====================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
-      .then((reg) => {
-        console.log('ServiceWorker 注册成功, 作用域:', reg.scope);
-      })
-      .catch((err) => {
-        console.warn('ServiceWorker 注册失败:', err);
-      });
+      .then((reg) => console.log('ServiceWorker registered:', reg.scope))
+      .catch((err) => console.warn('ServiceWorker registration failed:', err));
   });
 }
 
-// 离线/在线状态监控
 function updateNetworkStatus() {
   const isOnline = navigator.onLine;
   const badge = document.getElementById('netBadge');
   const text = document.getElementById('netText');
   if (isOnline) {
     badge.className = 'badge badge-online';
-    text.innerText = '在线';
+    text.innerText = disInfo.onlineMode;
   } else {
     badge.className = 'badge badge-offline';
-    text.innerText = '离线模式';
+    text.innerText = disInfo.offlineMode;
   }
 }
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
-updateNetworkStatus();
 
-// PWA 安装事件捕获
+// PWA 安装提示
 let deferredPrompt = null;
 const btnInstall = document.getElementById('btnInstall');
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -223,84 +650,424 @@ window.addEventListener('beforeinstallprompt', (e) => {
   deferredPrompt = e;
   btnInstall.style.display = 'flex';
 });
-
 btnInstall.addEventListener('click', async () => {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  console.log(`PWA 安装选择: ${outcome}`);
+  await deferredPrompt.userChoice;
   deferredPrompt = null;
   btnInstall.style.display = 'none';
 });
-
 window.addEventListener('appinstalled', () => {
   btnInstall.style.display = 'none';
-  console.log('PWA 已成功安装到设备');
 });
 
-// 环境检查：Web Bluetooth 与 HTTPS
+// 环境检查
 (function checkEnvironment() {
   const warning = document.getElementById('browserWarning');
   if (!navigator.bluetooth) {
     warning.style.display = 'block';
-    warning.innerHTML = '⚠️ 当前浏览器环境不支持 <strong>Web Bluetooth API</strong>。<br>推荐使用 <strong>Chrome、Edge</strong> 或 Android 版 Chrome 访问；iOS 环境请配合 WebBLE 专属浏览器使用。';
+    warning.innerHTML = '⚠️ 当前浏览器环境不支持 <strong>Web Bluetooth API</strong>。<br>推荐使用 <strong>Chrome、Edge</strong> 访问；iOS 请使用支持 WebBLE 的浏览器。';
   } else if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     warning.style.display = 'block';
-    warning.innerHTML = '⚠️ Web Bluetooth 和 Service Worker 必须在 <strong>HTTPS</strong> 安全上下文或 localhost 下工作。托管到 GitHub Pages 时将自动支持 HTTPS。';
+    warning.innerHTML = '⚠️ Web Bluetooth 和 Service Worker 必须在 <strong>HTTPS</strong> 安全上下文或 localhost 下工作。';
   }
 })();
 
-// ==================== 蓝牙控制核心逻辑 ====================
+// ==================== 蓝牙控制与状态数据结构 ====================
 const SER_UUID = "0000fff0-0000-1000-8000-00805f9b34fb";
 const R_UUID   = "0000fff1-0000-1000-8000-00805f9b34fb";
 const W_UUID   = "0000fff2-0000-1000-8000-00805f9b34fb";
 
+const cmdIdle = 0;
+const cmdAskMode = 167;
+
 let currentDevice = null;
 let writeChar = null;
 let pollTimer = null;
-let tx = new Uint8Array([170, 85, 0, 167, 170, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 136]);
+let allowSend = true;
+let keepFlag = false;
+let updateCnt = 0;
 
+// 设备状态量 (对应 origin.js)
+let curVal = 120;
+let volPro = 0;
+let offValInfo = 120;
+let midPowerOffVal = 133;
+let minOffVal = 50;
+let maxOffVal = 137;
+let isAutoPowerOn = false;
+let isAutoPowerOff = false;
+let curCur = 0;
+let startCur = 0;
+let startVol = 0;
+let startVolTmp = 0;
+let temperature = 250;
+let isPowerOn = false;
+let curMode = 1;
+
+let tx = new Uint8Array([170, 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 136]);
+
+// UI 元素引用
 const btnConnect = document.getElementById('btnConnect');
 const btnDisconnect = document.getElementById('btnDisconnect');
-const statusEl = document.getElementById('status');
+const bleStatus = document.getElementById('bleStatus');
+const powerStatus = document.getElementById('powerStatus');
 const dataCard = document.getElementById('dataCard');
+const settingCard = document.getElementById('settingCard');
+const bottomActionBar = document.getElementById('bottomActionBar');
 
+const curVoltageEl = document.getElementById('curVoltage');
+const volProEl = document.getElementById('volPro');
+const batBarEl = document.getElementById('batBar');
+const currentEl = document.getElementById('current');
+const startCurEl = document.getElementById('startCur');
+const tempEl = document.getElementById('temp');
+const startVolEl = document.getElementById('startVol');
+
+const sliderOffVal = document.getElementById('sliderOffVal');
+const offValText = document.getElementById('offValText');
+const sliderMinText = document.getElementById('sliderMinText');
+const sliderMaxText = document.getElementById('sliderMaxText');
+const chkAutoOff = document.getElementById('chkAutoOff');
+const chkAutoOn = document.getElementById('chkAutoOn');
+
+const btn1 = document.getElementById('btn1');
+const btn2 = document.getElementById('btn2');
+const btn3 = document.getElementById('btn3');
+
+// ==================== 格式化辅助函数 ====================
+function formatStartCur(val) {
+  if (val >= 325 && val <= 330) return ">320";
+  if (val >= 590 && val <= 700) return ">500";
+  if (val > 700) return ">320";
+  if (val >= 100) return "" + val;
+  if (val >= 10) return "0" + val;
+  if (val >= 1) return "00" + val;
+  return "000";
+}
+
+function formatStartVol(val) {
+  if (val >= 100) return (val / 100).toFixed(2);
+  if (val >= 10) return "0." + val;
+  if (val >= 1) return "0.0" + val;
+  return "0.00";
+}
+
+// 刷新 UI 状态
+function updateScreen() {
+  if (!currentDevice || !currentDevice.gatt.connected) {
+    powerStatus.innerText = disInfo.a5; // 断开 / OFF
+    return;
+  }
+
+  // 1. 电压与百分比
+  curVoltageEl.innerText = (curVal / 10).toFixed(1);
+  volProEl.innerText = volPro + " %";
+  batBarEl.style.width = Math.min(100, Math.max(0, volPro)) + "%";
+
+  // 2. 四宫格数值 (温度除以 10，电流除以 100 正确缩放)
+  currentEl.innerText = (curCur / 100).toFixed(2) + " A";
+  startCurEl.innerText = formatStartCur(startCur) + " A";
+  tempEl.innerText = (temperature / 10).toFixed(0) + " ℃";
+  startVolEl.innerText = formatStartVol(startVol) + " V";
+
+  // 3. 接通状态
+  powerStatus.innerText = isPowerOn ? disInfo.b8 : disInfo.b9;
+
+  // 4. 断电电压滑块与文本
+  sliderOffVal.min = minOffVal;
+  sliderOffVal.max = maxOffVal;
+  sliderOffVal.value = offValInfo;
+  offValText.innerText = (offValInfo / 10).toFixed(1) + " V";
+  sliderMinText.innerText = (minOffVal / 10).toFixed(1) + " V";
+  sliderMaxText.innerText = (maxOffVal / 10).toFixed(1) + " V";
+
+  // 5. 开关状态
+  chkAutoOff.checked = !!isAutoPowerOff;
+  chkAutoOn.checked = !!isAutoPowerOn;
+
+  // 6. 三个控制模式按钮高亮 (对应 origin.js updateScreen 逻辑)
+  btn1.className = "mode-btn";
+  btn2.className = "mode-btn";
+  btn3.className = "mode-btn";
+
+  if (!isPowerOn) {
+    if (curMode === 2) {
+      btn2.className = "mode-btn active";
+    } else {
+      btn3.className = "mode-btn active-off";
+    }
+  } else {
+    if (curMode === 1 || curMode === 3) {
+      btn1.className = "mode-btn active";
+    } else if (curMode === 2) {
+      btn2.className = "mode-btn active";
+    }
+  }
+}
+
+// ==================== 发送指令核心函数 ====================
+async function sendData() {
+  if (!allowSend || !writeChar) return;
+  try {
+    await writeChar.writeValueWithoutResponse(tx);
+    keepFlag = false;
+  } catch (err) {
+    console.warn("发送指令失败:", err);
+  }
+}
+
+// ==================== 事件函数绑定 (与 origin.js 方法对齐) ====================
+
+// 开启自动断电变化 (onIsAutoDisChange)
+function onIsAutoDisChange(val) {
+  allowSend = false;
+  tx[3] = 161; // cmdSetParam
+  keepFlag = true;
+  isAutoPowerOff = val;
+  tx[5] = (65280 & offValInfo) >> 8;
+  tx[6] = 255 & offValInfo;
+  tx[7] = isAutoPowerOn ? 1 : 0;
+  tx[8] = isAutoPowerOff ? 1 : 0;
+  allowSend = true;
+  sendData();
+}
+
+// 开启无感连接变化 (onIsAutoOnChange)
+function onIsAutoOnChange(val) {
+  allowSend = false;
+  keepFlag = true;
+  tx[3] = 161;
+  isAutoPowerOn = val;
+  tx[5] = (65280 & offValInfo) >> 8;
+  tx[6] = 255 & offValInfo;
+  tx[7] = isAutoPowerOn ? 1 : 0;
+  tx[8] = isAutoPowerOff ? 1 : 0;
+  allowSend = true;
+  sendData();
+}
+
+// 滑块滑动完成 (onSliderChanged)
+function onSliderChanged(val) {
+  offValInfo = parseInt(val, 10);
+  allowSend = false;
+  keepFlag = true;
+  tx[3] = 161;
+  tx[5] = (65280 & offValInfo) >> 8;
+  tx[6] = 255 & offValInfo;
+  tx[7] = isAutoPowerOn ? 1 : 0;
+  tx[8] = isAutoPowerOff ? 1 : 0;
+  allowSend = true;
+  sendData();
+}
+
+// 滑块滑动中实时显示 (onSliderChanging)
+function onSliderChanging(val) {
+  offValInfo = parseInt(val, 10);
+  offValText.innerText = (offValInfo / 10).toFixed(1) + " V";
+}
+
+// 通电按键 (onBtn1Clicked)
+function onBtn1Clicked() {
+  allowSend = false;
+  tx[3] = 163;
+  tx[4] = 8;
+  keepFlag = true;
+  allowSend = true;
+  sendData();
+}
+
+// 震动控制按键 (onBtn2Clicked)
+function onBtn2Clicked() {
+  allowSend = false;
+  tx[3] = 163;
+  tx[4] = 4;
+  keepFlag = true;
+  allowSend = true;
+  sendData();
+}
+
+// 断电按键 (onBtn3Clicked)
+function onBtn3Clicked() {
+  allowSend = false;
+  tx[3] = 163;
+  tx[4] = 2;
+  keepFlag = true;
+  allowSend = true;
+  sendData();
+}
+
+// 监听控件交互事件
+chkAutoOff.addEventListener('change', (e) => onIsAutoDisChange(e.target.checked));
+chkAutoOn.addEventListener('change', (e) => onIsAutoOnChange(e.target.checked));
+sliderOffVal.addEventListener('input', (e) => onSliderChanging(e.target.value));
+sliderOffVal.addEventListener('change', (e) => onSliderChanged(e.target.value));
+
+btn1.addEventListener('click', onBtn1Clicked);
+btn2.addEventListener('click', onBtn2Clicked);
+btn3.addEventListener('click', onBtn3Clicked);
+
+// ==================== 数据接收与握手解析 (processData) ====================
+function processData(rx) {
+  const cmd = rx[3];
+
+  switch (cmd) {
+    case cmdAskMode: // 167 握手
+      if (rx[4] === 170) {
+        curMode = rx[2];
+        tx[4] = 187;
+        sendData();
+      } else if (rx[4] === 187) {
+        tx[3] = cmdIdle;
+        curVal = (rx[5] << 8) | rx[6];
+        if (curVal < 180) {
+          volPro = Math.floor(((curVal - 100) / 40) * 100);
+          minOffVal = 50;
+          maxOffVal = 137;
+        } else {
+          volPro = Math.floor(((curVal - 180) / 80) * 100);
+          minOffVal = 200;
+          maxOffVal = 274;
+        }
+        midPowerOffVal = (rx[7] << 8) | rx[8];
+        offValInfo = midPowerOffVal;
+        isAutoPowerOn = rx[9] === 1;
+        isAutoPowerOff = rx[10] === 1;
+        startCur = (rx[12] << 8) | rx[13];
+
+        // 实时电流（符号位 + 保持原始数值，updateScreen 时除以 100）
+        let rawCur = (rx[14] << 8) | rx[15];
+        curCur = (rawCur & 0x8000) ? -1 * (rawCur & 0x7FFF) : (rawCur & 0x7FFF);
+
+        // 实时温度（16位补码，updateScreen 时除以 10）
+        let rawTemp = (rx[17] << 8) | rx[18];
+        if (rawTemp & 0x8000) rawTemp -= 65536;
+        temperature = rawTemp;
+
+        isPowerOn = rx[16] === 1;
+        curMode = rx[2];
+        updateScreen();
+        sendData();
+      }
+      break;
+
+    case cmdIdle: // 0 周期轮询
+      if (!keepFlag) {
+        tx[3] = 1; // 交替拉取启动电压
+      }
+      updateCnt++;
+      if (updateCnt >= 5) {
+        curVal = (rx[5] << 8) | rx[6];
+        if (curVal < 180) {
+          volPro = Math.floor(((curVal - 100) / 40) * 100);
+        } else {
+          volPro = Math.floor(((curVal - 180) / 80) * 100);
+        }
+        updateCnt = 0;
+
+        let rawTemp = (rx[17] << 8) | rx[18];
+        if (rawTemp & 0x8000) rawTemp -= 65536;
+        temperature = rawTemp;
+
+        startVol = startVolTmp;
+        midPowerOffVal = (rx[7] << 8) | rx[8];
+        offValInfo = midPowerOffVal;
+        isAutoPowerOn = rx[9] === 1;
+        isAutoPowerOff = rx[10] === 1;
+      }
+
+      isPowerOn = rx[16] === 1;
+      startCur = (rx[12] << 8) | rx[13];
+
+      let rawCur = (rx[14] << 8) | rx[15];
+      curCur = (rawCur & 0x8000) ? -1 * (rawCur & 0x7FFF) : (rawCur & 0x7FFF);
+
+      curMode = rx[2];
+      startVol = startVolTmp;
+      updateScreen();
+      break;
+
+    case 1: // 响应查询启动电压
+      startVolTmp = (rx[5] << 8) | rx[6];
+      if (!keepFlag) {
+        tx[3] = cmdIdle;
+      }
+      break;
+
+    case 161: // cmdSetParam 反馈
+      if (tx[3] === 161) {
+        allowSend = true;
+        tx[3] = cmdIdle;
+      }
+      break;
+
+    case 163: // 控制按键反馈
+      if (tx[3] === 163) {
+        tx[3] = cmdIdle;
+      }
+      break;
+  }
+}
+
+// 轮询心跳定时器
+function startPolling() {
+  clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    if (!writeChar) return;
+    try {
+      await writeChar.writeValueWithoutResponse(tx);
+    } catch (e) {
+      console.warn('轮询发包异常:', e);
+    }
+  }, 1000);
+}
+
+// ==================== 蓝牙连接与断开流程 ====================
 btnConnect.addEventListener('click', async () => {
   try {
-    statusEl.innerText = "状态: 正在唤起系统蓝牙扫描...";
-    // 1. 请求设备
+    bleStatus.innerText = disInfo.a3; // 正在连接 / Connecting
     const device = await navigator.bluetooth.requestDevice({
       filters: [{ namePrefix: 'RIEIEK' }],
       optionalServices: [SER_UUID]
     });
     currentDevice = device;
 
-    statusEl.innerText = `状态: 发现 ${device.name || '设备'}，正在连接 GATT...`;
+    bleStatus.innerText = `${device.name || 'RIEIEK'} (GATT...)`;
     const server = await device.gatt.connect();
 
-    // 2. 获取服务与特征
     const service = await server.getPrimaryService(SER_UUID);
     const readChar = await service.getCharacteristic(R_UUID);
     writeChar = await service.getCharacteristic(W_UUID);
 
-    // 3. 订阅通知
+    // 订阅通知
     await readChar.startNotifications();
-    readChar.addEventListener('characteristicvaluechanged', handleNotifications);
+    readChar.addEventListener('characteristicvaluechanged', (event) => {
+      const rx = new Uint8Array(event.target.value.buffer);
+      if (rx.length < 20 || rx[0] !== 0xAA || rx[1] !== 0x55 || rx[19] !== 0x88) return;
+      processData(rx);
+    });
 
-    statusEl.innerText = "状态: 已连接，开始握手与数据同步...";
-    dataCard.style.display = "block";
+    bleStatus.innerText = disInfo.b7; // 已连接 / Connected
     btnConnect.style.display = "none";
     btnDisconnect.style.display = "block";
+    dataCard.style.display = "block";
+    settingCard.style.display = "block";
+    bottomActionBar.style.display = "block";
 
-    // 4. 800ms 握手发包并启动 1秒轮询定时器
-    setTimeout(sendHandshake, 800);
-    clearInterval(pollTimer);
-    pollTimer = setInterval(sendPoll, 1000);
+    // 启动握手流程 (800ms)
+    setTimeout(() => {
+      allowSend = true;
+      tx[3] = cmdAskMode; // 167
+      tx[4] = 170;
+      sendData();
+      startPolling();
+    }, 800);
 
     device.addEventListener('gattserverdisconnected', onDisconnected);
 
   } catch (error) {
-    statusEl.innerText = "提示: " + error.message;
+    bleStatus.innerText = disInfo.b6 + ": " + error.message;
+    console.warn("连接错误:", error);
   }
 });
 
@@ -313,69 +1080,21 @@ btnDisconnect.addEventListener('click', () => {
 });
 
 function onDisconnected() {
-  statusEl.innerText = "状态: 已断开连接";
+  bleStatus.innerText = disInfo.b2; // 蓝牙连接已断开
+  powerStatus.innerText = disInfo.a5; // 断开
   btnConnect.style.display = "block";
   btnConnect.disabled = false;
   btnDisconnect.style.display = "none";
+  dataCard.style.display = "none";
+  settingCard.style.display = "none";
+  bottomActionBar.style.display = "none";
   clearInterval(pollTimer);
   pollTimer = null;
+  writeChar = null;
 }
 
-async function sendHandshake() {
-  if (!writeChar) return;
-  tx[3] = 167; // cmdAskMode
-  tx[4] = 170; // 0xAA
-  try {
-    await writeChar.writeValueWithoutResponse(tx);
-  } catch (e) {
-    console.warn('握手写入失败', e);
-  }
-}
-
-async function sendPoll() {
-  if (!writeChar) return;
-  try {
-    await writeChar.writeValueWithoutResponse(tx);
-  } catch (e) {
-    console.warn('轮询写入失败', e);
-  }
-}
-
-function handleNotifications(event) {
-  const rx = new Uint8Array(event.target.value.buffer);
-  if (rx.length < 20 || rx[0] !== 0xAA || rx[1] !== 0x55) return;
-
-  // 握手状态推进
-  if (rx[3] === 167) {
-    if (rx[4] === 170) {
-      tx[4] = 187; // 切换下一步握手
-      return;
-    } else if (rx[4] === 187) {
-      tx[3] = 0;   // 切换为 cmdIdle (基础轮询)
-    }
-  }
-
-  // 电压与百分比换算
-  const curVal = (rx[5] << 8) | rx[6];
-  let volPro = curVal < 180 ? ((curVal - 100) / 40) * 100 : ((curVal - 180) / 80) * 100;
-  volPro = Math.max(0, Math.min(100, Math.floor(volPro)));
-  document.getElementById('volPro').innerText = volPro + " %";
-
-  // 电流换算 (符号位判断)
-  const rawCur = (rx[14] << 8) | rx[15];
-  const cur = (rawCur & 0x8000) ? -1 * (rawCur & 0x7FFF) : (rawCur & 0x7FFF);
-  document.getElementById('current').innerText = cur + " A";
-
-  // 温度换算 (16 位补码)
-  let temp = (rx[17] << 8) | rx[18];
-  if (temp & 0x8000) temp -= 65536;
-  document.getElementById('temp').innerText = temp + " ℃";
-
-  // 开关与标志
-  document.getElementById('powerStatus').innerText = rx[16] === 1 ? "已通电" : "已关断";
-  document.getElementById('autoOn').innerText = rx[9] === 1 ? "开" : "关";
-  document.getElementById('autoOff').innerText = rx[10] === 1 ? "开" : "关";
-}
+// 初始化语言与界面
+applyLanguage();
 </script>
 </body>
 </html>
