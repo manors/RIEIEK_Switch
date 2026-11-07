@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>RIEIEK 智能电瓶断电开关</title>
+  <title>RIEIEK Smart Battery Switch</title>
   
-  <!-- PWA & 移动端相关元数据 -->
   <meta name="theme-color" content="#007aff">
-  <meta name="description" content="RIEIEK 智能电瓶断电开关蓝牙离线监控仪表盘">
+  <meta name="description" content="RIEIEK Smart Battery Switch Web Dashboard">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -136,8 +135,6 @@
       color: #666;
       margin-top: 10px;
     }
-
-    /* 电池主监控展示 */
     .voltage-hero {
       display: flex;
       align-items: baseline;
@@ -176,8 +173,6 @@
       border-radius: 6px;
       transition: width 0.4s ease;
     }
-
-    /* 四宫格数据网格 */
     .metric-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -200,8 +195,6 @@
       color: #1c1c1e;
       font-variant-numeric: tabular-nums;
     }
-
-    /* 设置与滑块区域 */
     .setting-item {
       padding: 12px 0;
       border-bottom: 1px solid #f0f0f2;
@@ -259,8 +252,6 @@
       box-shadow: 0 2px 6px rgba(0,122,255,0.4);
       cursor: pointer;
     }
-
-    /* 原生 Switch 风格开关 */
     .switch-wrap {
       position: relative;
       display: inline-block;
@@ -299,8 +290,6 @@
     input:checked + .switch-slider:before {
       transform: translateX(20px);
     }
-
-    /* 底部固定三大操作按钮栏 */
     .bottom-action-bar {
       position: fixed;
       bottom: 0;
@@ -352,7 +341,6 @@
       border-color: #ff3b30;
       box-shadow: 0 3px 8px rgba(255, 59, 48, 0.3);
     }
-
     .warning-box {
       background: #fff8e6;
       border: 1px solid #ffeeba;
@@ -379,42 +367,57 @@
     <div class="app-title">
       <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="512" height="512" rx="115" fill="#007aff"/>
-        <path d="M256 100 V 230" stroke="#ffffff" stroke-width="36" stroke-linecap="round"/>
-        <path d="M165 160 A 130 130 0 1 0 347 160" stroke="#ffffff" stroke-width="36" stroke-linecap="round"/>
-        <path d="M236 290 L276 325 L256 345 L256 265 L276 285 L236 320" stroke="#64d2ff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- 1. Large Car Silhouette -->
+        <path d="M 42 220 Q 48 185 80 162 L 165 150 L 225 100 L 330 100 L 395 148 L 442 162 Q 470 185 470 220 L 440 220 Q 415 242 350 242 Q 325 220 185 220 Q 160 242 95 242 Q 70 220 42 220 Z" fill="#ffffff" fill-opacity="0.95"/>
+        <path d="M 175 152 L 228 108 L 324 108 L 382 152 Z" fill="#0051c7"/>
+        <line x1="275" y1="108" x2="275" y2="152" stroke="#ffffff" stroke-width="5"/>
+        <circle cx="130" cy="226" r="38" fill="#1e293b" stroke="#ffffff" stroke-width="5"/>
+        <circle cx="130" cy="226" r="16" fill="#94a3b8"/>
+        <circle cx="380" cy="226" r="38" fill="#1e293b" stroke="#ffffff" stroke-width="5"/>
+        <circle cx="380" cy="226" r="16" fill="#94a3b8"/>
+        <rect x="44" y="188" width="14" height="14" rx="3" fill="#ffd60a"/>
+        <rect x="456" y="188" width="12" height="14" rx="3" fill="#ff453a"/>
+        <!-- 2. Small Translucent Battery & Switch Overlay -->
+        <rect x="194" y="286" width="32" height="16" rx="4" fill="#ffffff" fill-opacity="0.9"/>
+        <rect x="286" y="286" width="32" height="16" rx="4" fill="#ffffff" fill-opacity="0.9"/>
+        <rect x="168" y="300" width="176" height="130" rx="18" fill="#0a193c" fill-opacity="0.82" stroke="#ffffff" stroke-width="5"/>
+        <line x1="193" y1="326" x2="207" y2="326" stroke="#ff453a" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="200" y1="319" x2="200" y2="333" stroke="#ff453a" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="312" y1="326" x2="326" y2="326" stroke="#64d2ff" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- 3. Power Switch Symbol (Standard IEC 60417-5009) -->
+        <path d="M 280 349 A 34 34 0 1 1 232 349" fill="none" stroke="#ffd60a" stroke-width="8" stroke-linecap="round"/>
+        <rect x="252" y="325" width="8" height="46" rx="4" fill="#ffd60a"/>
       </svg>
-      <span id="txtMainTitle">智能电瓶断电开关</span>
+      <span id="txtMainTitle">Smart Battery Switch</span>
     </div>
     <div class="header-actions">
-      <button id="btnLang" class="lang-btn">English</button>
+      <button id="btnLang" class="lang-btn">中文</button>
       <div id="netBadge" class="badge badge-online">
         <span class="badge-dot"></span>
-        <span id="netText">在线</span>
+        <span id="netText">Online</span>
       </div>
     </div>
   </header>
 
   <div id="browserWarning" class="warning-box"></div>
 
-  <!-- PWA 安装提示按钮 -->
   <button id="btnInstall" class="btn btn-install">
-    📲 安装应用到主屏幕 (支持离线使用)
+    📲 Install App to Home Screen
   </button>
 
-  <!-- 蓝牙连接与状态卡片 -->
   <div class="card">
-    <button id="btnConnect" class="btn">扫描并连接设备</button>
-    <button id="btnDisconnect" class="btn btn-secondary" style="display: none;">断开蓝牙连接</button>
+    <button id="btnConnect" class="btn">Scan & Connect Device</button>
+    <button id="btnDisconnect" class="btn btn-secondary" style="display: none;">Disconnect Bluetooth</button>
+    
     <div class="status-row">
-      <span><span id="lblBleStatus">蓝牙状态:</span> <strong id="bleStatus">未连接</strong></span>
-      <span><span id="lblPowerState">接通状态:</span> <strong id="powerStatus">断开</strong></span>
+      <span><span id="lblBleStatus">Bluetooth:</span> <strong id="bleStatus">Not connected</strong></span>
+      <span><span id="lblPowerState">State:</span> <strong id="powerStatus">OFF</strong></span>
     </div>
   </div>
 
-  <!-- 电瓶状态主卡片 -->
   <div class="card" id="dataCard" style="display: none;">
     <div class="card-title">
-      <span id="lblBatInfo">电瓶状态</span>
+      <span id="lblBatInfo">Battery Info</span>
       <span class="vol-pro-tag" id="volPro">-- %</span>
     </div>
     <div class="voltage-hero">
@@ -427,33 +430,30 @@
       <div class="battery-bar-fill" id="batBar"></div>
     </div>
 
-    <!-- 四宫格指标 -->
     <div class="metric-grid">
       <div class="metric-cell">
-        <div class="metric-cell-label" id="lblCur">实时电流:</div>
+        <div class="metric-cell-label" id="lblCur">Current:</div>
         <div class="metric-cell-val" id="current">-- A</div>
       </div>
       <div class="metric-cell">
-        <div class="metric-cell-label" id="lblStartCur">启动电流:</div>
+        <div class="metric-cell-label" id="lblStartCur">StartCur:</div>
         <div class="metric-cell-val" id="startCur">-- A</div>
       </div>
       <div class="metric-cell">
-        <div class="metric-cell-label" id="lblTemp">实时温度:</div>
+        <div class="metric-cell-label" id="lblTemp">Temp:</div>
         <div class="metric-cell-val" id="temp">-- ℃</div>
       </div>
       <div class="metric-cell">
-        <div class="metric-cell-label" id="lblStartVol">启动电压:</div>
+        <div class="metric-cell-label" id="lblStartVol">StartVol:</div>
         <div class="metric-cell-val" id="startVol">-- V</div>
       </div>
     </div>
   </div>
 
-  <!-- 参数配置卡片 -->
   <div class="card" id="settingCard" style="display: none;">
-    <!-- 断电电压滑块 -->
     <div class="setting-item">
       <div class="setting-header">
-        <span class="setting-title" id="lblOffVol">断电电压:</span>
+        <span class="setting-title" id="lblOffVol">Off Voltage:</span>
         <span class="slider-val-now" id="offValText">12.0 V</span>
       </div>
       <div class="slider-container">
@@ -465,12 +465,11 @@
       </div>
     </div>
 
-    <!-- 自动断电开关 -->
     <div class="setting-item">
       <div class="setting-header">
         <div>
-          <div class="setting-title" id="lblAutoOff">开启自动断电:</div>
-          <div class="setting-desc" id="lblAutoOffDesc">(开启后当电压低于设定值后，自动断开连接)</div>
+          <div class="setting-title" id="lblAutoOff">Auto Power Off:</div>
+          <div class="setting-desc" id="lblAutoOffDesc">(Power off automatically when voltage drops below set value)</div>
         </div>
         <label class="switch-wrap">
           <input type="checkbox" id="chkAutoOff">
@@ -479,12 +478,11 @@
       </div>
     </div>
 
-    <!-- 开启无感连接开关 -->
     <div class="setting-item">
       <div class="setting-header">
         <div>
-          <div class="setting-title" id="lblAutoOn">开启无感连接:</div>
-          <div class="setting-desc" id="lblAutoOnDesc">(开启后手机靠近、自动通电，需要配对好蓝牙)</div>
+          <div class="setting-title" id="lblAutoOn">Auto Power On:</div>
+          <div class="setting-desc" id="lblAutoOnDesc">(Power on automatically when phone approaches via Bluetooth)</div>
         </div>
         <label class="switch-wrap">
           <input type="checkbox" id="chkAutoOn">
@@ -494,136 +492,145 @@
     </div>
   </div>
 
-  <!-- 底部固定三大操作按钮栏 (通电 / 震动控制 / 断电) -->
   <div class="bottom-action-bar" id="bottomActionBar" style="display: none;">
     <div class="bottom-action-inner">
-      <button class="mode-btn" id="btn1">
-        <span id="txtBtn1">通电</span>
+      <button class="mode-btn" id="btnPowerOn">
+        <span id="txtBtnPowerOn">ON</span>
       </button>
-      <button class="mode-btn" id="btn2">
-        <span id="txtBtn2">震动控制</span>
+      <button class="mode-btn" id="btnSway">
+        <span id="txtBtnSway">Sway</span>
       </button>
-      <button class="mode-btn" id="btn3">
-        <span id="txtBtn3">断电</span>
+      <button class="mode-btn" id="btnPowerOff">
+        <span id="txtBtnPowerOff">OFF</span>
       </button>
     </div>
   </div>
 
   <footer>
-    RIEIEK PWA &bull; 支持离线打开与 Web 蓝牙通信
+    RIEIEK PWA &bull; Offline &amp; Web Bluetooth
   </footer>
 
 <script>
-// ==================== 国际化字典 (与 origin.js 保持一致) ====================
-const Chinese = {
-  a1: "智能电瓶断电开关",
-  a2: "蓝牙状态:",
-  a3: "正在连接",
-  a4: "接通状态:",
-  a5: "断开",
-  a6: "电瓶状态",
-  a7: "实时电流:",
-  a8: "启动电流:",
-  a9: "实时温度:",
-  a10: "启动电压:",
-  a11: "断电电压:",
-  a12: "开启自动断电:",
-  a13: "(开启后当电压低于设定值后，自动断开连接)",
-  a14: "开启无感连接:",
-  a15: "(开启后手机靠近、自动通电，需要配对好蓝牙)",
-  a16: "通电",
-  a17: "震动控制",
-  a18: "断电",
-  a19: "正在搜索",
-  b1: "将请求蓝牙权限以连接外围设备!",
-  b2: "蓝牙连接已断开",
-  b5: "正在同步数据...",
-  b6: "连接失败",
-  b7: "已连接",
-  b8: "接通",
-  b9: "断开",
-  scanConnect: "扫描并连接设备",
-  disconnect: "断开蓝牙连接",
-  offlineMode: "离线模式",
-  onlineMode: "在线",
-  installPrompt: "📲 安装应用到主屏幕 (支持离线使用)"
+const I18N = {
+  en: {
+    pageTitle: "RIEIEK Smart Battery Switch",
+    appTitle: "Smart Battery Switch",
+    bluetoothStatus: "Bluetooth:",
+    powerState: "State:",
+    batteryInfo: "Battery Info",
+    current: "Current:",
+    startCurrent: "StartCur:",
+    temperature: "Temp:",
+    startVoltage: "StartVol:",
+    offVoltage: "Off Voltage:",
+    autoPowerOff: "Auto Power Off:",
+    autoPowerOffDesc: "(Power off automatically when voltage drops below set value)",
+    autoPowerOn: "Auto Power On:",
+    autoPowerOnDesc: "(Power on automatically when phone approaches via Bluetooth)",
+    btnPowerOn: "ON",
+    btnSway: "Sway",
+    btnPowerOff: "OFF",
+    statusNotConnected: "Not connected",
+    statusConnecting: "Connecting...",
+    statusConnected: "Connected",
+    statusDisconnected: "Bluetooth disconnected",
+    statusFailed: "Connection failed",
+    stateOn: "ON",
+    stateOff: "OFF",
+    scanConnect: "Scan & Connect Device",
+    disconnect: "Disconnect Bluetooth",
+    offlineMode: "Offline",
+    onlineMode: "Online",
+    installPrompt: "📲 Install App to Home Screen"
+  },
+  zh: {
+    pageTitle: "RIEIEK 智能电瓶断电开关",
+    appTitle: "智能电瓶断电开关",
+    bluetoothStatus: "蓝牙状态:",
+    powerState: "接通状态:",
+    batteryInfo: "电瓶状态",
+    current: "实时电流:",
+    startCurrent: "启动电流:",
+    temperature: "实时温度:",
+    startVoltage: "启动电压:",
+    offVoltage: "断电电压:",
+    autoPowerOff: "开启自动断电:",
+    autoPowerOffDesc: "(开启后当电压低于设定值后，自动断开连接)",
+    autoPowerOn: "开启无感连接:",
+    autoPowerOnDesc: "(开启后手机靠近、自动通电，需要配对好蓝牙)",
+    btnPowerOn: "通电",
+    btnSway: "震动控制",
+    btnPowerOff: "断电",
+    statusNotConnected: "未连接",
+    statusConnecting: "正在连接...",
+    statusConnected: "已连接",
+    statusDisconnected: "蓝牙连接已断开",
+    statusFailed: "连接失败",
+    stateOn: "接通",
+    stateOff: "断开",
+    scanConnect: "扫描并连接设备",
+    disconnect: "断开蓝牙连接",
+    offlineMode: "离线模式",
+    onlineMode: "在线",
+    installPrompt: "📲 安装应用到主屏幕 (支持离线使用)"
+  }
 };
 
-const English = {
-  a1: "Smart Battery Switch",
-  a2: "Bluetooth:",
-  a3: "Connecting...",
-  a4: "State:",
-  a5: "OFF",
-  a6: "Battery Info",
-  a7: "Current:",
-  a8: "StartCur:",
-  a9: "Temp:",
-  a10: "StartVol:",
-  a11: "Off Voltage:",
-  a12: "Auto Power Off:",
-  a13: "(Voltage is below the set value, will power off)",
-  a14: "Auto Power On:",
-  a15: "(Bluetooth connected, will power on)",
-  a16: "ON",
-  a17: "Sway",
-  a18: "OFF",
-  a19: "Searching",
-  b1: "Requesting Bluetooth permission!",
-  b2: "Bluetooth disconnected",
-  b5: "Syncing data...",
-  b6: "Connection failed",
-  b7: "Connected",
-  b8: "ON",
-  b9: "OFF",
-  scanConnect: "Scan & Connect Device",
-  disconnect: "Disconnect Bluetooth",
-  offlineMode: "Offline",
-  onlineMode: "Online",
-  installPrompt: "📲 Install to Home Screen (Offline Ready)"
-};
+function getInitialLanguage() {
+  const saved = localStorage.getItem('rieiek_lang');
+  if (saved === 'zh' || saved === 'en') return saved;
+  const sysLang = (navigator.languages && navigator.languages.length)
+    ? navigator.languages[0]
+    : (navigator.language || '');
+  return sysLang.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+}
 
-let currentLang = localStorage.getItem('rieiek_lang') || 'Chinese';
-let disInfo = currentLang === 'Chinese' ? Chinese : English;
+let currentLang = getInitialLanguage();
+let disInfo = I18N[currentLang];
 
-function applyLanguage() {
-  document.getElementById('txtMainTitle').innerText = disInfo.a1;
-  document.getElementById('lblBleStatus').innerText = disInfo.a2;
-  document.getElementById('lblPowerState').innerText = disInfo.a4;
-  document.getElementById('lblBatInfo').innerText = disInfo.a6;
-  document.getElementById('lblCur').innerText = disInfo.a7;
-  document.getElementById('lblStartCur').innerText = disInfo.a8;
-  document.getElementById('lblTemp').innerText = disInfo.a9;
-  document.getElementById('lblStartVol').innerText = disInfo.a10;
-  document.getElementById('lblOffVol').innerText = disInfo.a11;
-  document.getElementById('lblAutoOff').innerText = disInfo.a12;
-  document.getElementById('lblAutoOffDesc').innerText = disInfo.a13;
-  document.getElementById('lblAutoOn').innerText = disInfo.a14;
-  document.getElementById('lblAutoOnDesc').innerText = disInfo.a15;
-  document.getElementById('txtBtn1').innerText = disInfo.a16;
-  document.getElementById('txtBtn2').innerText = disInfo.a17;
-  document.getElementById('txtBtn3').innerText = disInfo.a18;
+function applyLanguage(lang) {
+  currentLang = lang;
+  disInfo = I18N[lang];
+  document.title = disInfo.pageTitle;
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+
+  document.getElementById('txtMainTitle').innerText = disInfo.appTitle;
+  document.getElementById('lblBleStatus').innerText = disInfo.bluetoothStatus;
+  document.getElementById('lblPowerState').innerText = disInfo.powerState;
+  document.getElementById('lblBatInfo').innerText = disInfo.batteryInfo;
+  document.getElementById('lblCur').innerText = disInfo.current;
+  document.getElementById('lblStartCur').innerText = disInfo.startCurrent;
+  document.getElementById('lblTemp').innerText = disInfo.temperature;
+  document.getElementById('lblStartVol').innerText = disInfo.startVoltage;
+  document.getElementById('lblOffVol').innerText = disInfo.offVoltage;
+  document.getElementById('lblAutoOff').innerText = disInfo.autoPowerOff;
+  document.getElementById('lblAutoOffDesc').innerText = disInfo.autoPowerOffDesc;
+  document.getElementById('lblAutoOn').innerText = disInfo.autoPowerOn;
+  document.getElementById('lblAutoOnDesc').innerText = disInfo.autoPowerOnDesc;
+  document.getElementById('txtBtnPowerOn').innerText = disInfo.btnPowerOn;
+  document.getElementById('txtBtnSway').innerText = disInfo.btnSway;
+  document.getElementById('txtBtnPowerOff').innerText = disInfo.btnPowerOff;
   document.getElementById('btnConnect').innerText = disInfo.scanConnect;
   document.getElementById('btnDisconnect').innerText = disInfo.disconnect;
   document.getElementById('btnInstall').innerText = disInfo.installPrompt;
-  document.getElementById('btnLang').innerText = currentLang === 'Chinese' ? 'English' : '中文';
+  document.getElementById('btnLang').innerText = lang === 'zh' ? 'English' : '中文';
+
   updateNetworkStatus();
   updateScreen();
 }
 
 document.getElementById('btnLang').addEventListener('click', () => {
-  currentLang = currentLang === 'Chinese' ? 'English' : 'Chinese';
-  localStorage.setItem('rieiek_lang', currentLang);
-  disInfo = currentLang === 'Chinese' ? Chinese : English;
-  applyLanguage();
+  const nextLang = currentLang === 'zh' ? 'en' : 'zh';
+  localStorage.setItem('rieiek_lang', nextLang);
+  applyLanguage(nextLang);
 });
 
-// ==================== PWA Service Worker 注册与离线检测 ====================
+// Service Worker Registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
-      .then((reg) => console.log('ServiceWorker registered:', reg.scope))
-      .catch((err) => console.warn('ServiceWorker registration failed:', err));
+      .then((reg) => console.log('SW registered:', reg.scope))
+      .catch((err) => console.warn('SW registration failed:', err));
   });
 }
 
@@ -631,18 +638,13 @@ function updateNetworkStatus() {
   const isOnline = navigator.onLine;
   const badge = document.getElementById('netBadge');
   const text = document.getElementById('netText');
-  if (isOnline) {
-    badge.className = 'badge badge-online';
-    text.innerText = disInfo.onlineMode;
-  } else {
-    badge.className = 'badge badge-offline';
-    text.innerText = disInfo.offlineMode;
-  }
+  badge.className = isOnline ? 'badge badge-online' : 'badge badge-offline';
+  text.innerText = isOnline ? disInfo.onlineMode : disInfo.offlineMode;
 }
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
-// PWA 安装提示
+// PWA Install Prompt Handler
 let deferredPrompt = null;
 const btnInstall = document.getElementById('btnInstall');
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -661,19 +663,19 @@ window.addEventListener('appinstalled', () => {
   btnInstall.style.display = 'none';
 });
 
-// 环境检查
+// Environment Check
 (function checkEnvironment() {
   const warning = document.getElementById('browserWarning');
   if (!navigator.bluetooth) {
     warning.style.display = 'block';
-    warning.innerHTML = '⚠️ 当前浏览器环境不支持 <strong>Web Bluetooth API</strong>。<br>推荐使用 <strong>Chrome、Edge</strong> 访问；iOS 请使用支持 WebBLE 的浏览器。';
+    warning.innerHTML = '⚠️ Web Bluetooth API is not supported in this browser.<br>Recommended: Chrome or Edge over HTTPS; On iOS, please use WebBLE browser.';
   } else if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
     warning.style.display = 'block';
-    warning.innerHTML = '⚠️ Web Bluetooth 和 Service Worker 必须在 <strong>HTTPS</strong> 安全上下文或 localhost 下工作。';
+    warning.innerHTML = '⚠️ Web Bluetooth requires a secure HTTPS context or localhost.';
   }
 })();
 
-// ==================== 蓝牙控制与状态数据结构 ====================
+// BLE Service & Characteristic UUIDs
 const SER_UUID = "0000fff0-0000-1000-8000-00805f9b34fb";
 const R_UUID   = "0000fff1-0000-1000-8000-00805f9b34fb";
 const W_UUID   = "0000fff2-0000-1000-8000-00805f9b34fb";
@@ -688,7 +690,7 @@ let allowSend = true;
 let keepFlag = false;
 let updateCnt = 0;
 
-// 设备状态量 (对应 origin.js)
+// Device States
 let curVal = 120;
 let volPro = 0;
 let offValInfo = 120;
@@ -707,9 +709,10 @@ let curMode = 1;
 
 let tx = new Uint8Array([170, 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 136]);
 
-// UI 元素引用
+// UI Element Bindings
 const btnConnect = document.getElementById('btnConnect');
 const btnDisconnect = document.getElementById('btnDisconnect');
+
 const bleStatus = document.getElementById('bleStatus');
 const powerStatus = document.getElementById('powerStatus');
 const dataCard = document.getElementById('dataCard');
@@ -731,20 +734,9 @@ const sliderMaxText = document.getElementById('sliderMaxText');
 const chkAutoOff = document.getElementById('chkAutoOff');
 const chkAutoOn = document.getElementById('chkAutoOn');
 
-const btn1 = document.getElementById('btn1');
-const btn2 = document.getElementById('btn2');
-const btn3 = document.getElementById('btn3');
-
-// ==================== 格式化辅助函数 ====================
-function formatStartCur(val) {
-  if (val >= 325 && val <= 330) return ">320";
-  if (val >= 590 && val <= 700) return ">500";
-  if (val > 700) return ">320";
-  if (val >= 100) return "" + val;
-  if (val >= 10) return "0" + val;
-  if (val >= 1) return "00" + val;
-  return "000";
-}
+const btnPowerOn = document.getElementById('btnPowerOn');
+const btnSway = document.getElementById('btnSway');
+const btnPowerOff = document.getElementById('btnPowerOff');
 
 function formatStartVol(val) {
   if (val >= 100) return (val / 100).toFixed(2);
@@ -753,28 +745,23 @@ function formatStartVol(val) {
   return "0.00";
 }
 
-// 刷新 UI 状态
 function updateScreen() {
   if (!currentDevice || !currentDevice.gatt.connected) {
-    powerStatus.innerText = disInfo.a5; // 断开 / OFF
+    powerStatus.innerText = disInfo.stateOff;
     return;
   }
 
-  // 1. 电压与百分比
   curVoltageEl.innerText = (curVal / 10).toFixed(1);
   volProEl.innerText = volPro + " %";
   batBarEl.style.width = Math.min(100, Math.max(0, volPro)) + "%";
 
-  // 2. 四宫格数值 (温度除以 10，电流除以 100 正确缩放)
   currentEl.innerText = (curCur / 100).toFixed(2) + " A";
-  startCurEl.innerText = formatStartCur(startCur) + " A";
-  tempEl.innerText = (temperature / 10).toFixed(0) + " ℃";
+  startCurEl.innerText = startCur + " A";
+  tempEl.innerText = (temperature / 10).toFixed(1) + " ℃";
   startVolEl.innerText = formatStartVol(startVol) + " V";
 
-  // 3. 接通状态
-  powerStatus.innerText = isPowerOn ? disInfo.b8 : disInfo.b9;
+  powerStatus.innerText = isPowerOn ? disInfo.stateOn : disInfo.stateOff;
 
-  // 4. 断电电压滑块与文本
   sliderOffVal.min = minOffVal;
   sliderOffVal.max = maxOffVal;
   sliderOffVal.value = offValInfo;
@@ -782,47 +769,41 @@ function updateScreen() {
   sliderMinText.innerText = (minOffVal / 10).toFixed(1) + " V";
   sliderMaxText.innerText = (maxOffVal / 10).toFixed(1) + " V";
 
-  // 5. 开关状态
   chkAutoOff.checked = !!isAutoPowerOff;
   chkAutoOn.checked = !!isAutoPowerOn;
 
-  // 6. 三个控制模式按钮高亮 (对应 origin.js updateScreen 逻辑)
-  btn1.className = "mode-btn";
-  btn2.className = "mode-btn";
-  btn3.className = "mode-btn";
+  btnPowerOn.className = "mode-btn";
+  btnSway.className = "mode-btn";
+  btnPowerOff.className = "mode-btn";
 
   if (!isPowerOn) {
     if (curMode === 2) {
-      btn2.className = "mode-btn active";
+      btnSway.className = "mode-btn active";
     } else {
-      btn3.className = "mode-btn active-off";
+      btnPowerOff.className = "mode-btn active-off";
     }
   } else {
     if (curMode === 1 || curMode === 3) {
-      btn1.className = "mode-btn active";
+      btnPowerOn.className = "mode-btn active";
     } else if (curMode === 2) {
-      btn2.className = "mode-btn active";
+      btnSway.className = "mode-btn active";
     }
   }
 }
 
-// ==================== 发送指令核心函数 ====================
 async function sendData() {
   if (!allowSend || !writeChar) return;
   try {
     await writeChar.writeValueWithoutResponse(tx);
     keepFlag = false;
   } catch (err) {
-    console.warn("发送指令失败:", err);
+    console.warn("BLE write error:", err);
   }
 }
 
-// ==================== 事件函数绑定 (与 origin.js 方法对齐) ====================
-
-// 开启自动断电变化 (onIsAutoDisChange)
 function onIsAutoDisChange(val) {
   allowSend = false;
-  tx[3] = 161; // cmdSetParam
+  tx[3] = 161;
   keepFlag = true;
   isAutoPowerOff = val;
   tx[5] = (65280 & offValInfo) >> 8;
@@ -833,7 +814,6 @@ function onIsAutoDisChange(val) {
   sendData();
 }
 
-// 开启无感连接变化 (onIsAutoOnChange)
 function onIsAutoOnChange(val) {
   allowSend = false;
   keepFlag = true;
@@ -847,7 +827,6 @@ function onIsAutoOnChange(val) {
   sendData();
 }
 
-// 滑块滑动完成 (onSliderChanged)
 function onSliderChanged(val) {
   offValInfo = parseInt(val, 10);
   allowSend = false;
@@ -861,14 +840,12 @@ function onSliderChanged(val) {
   sendData();
 }
 
-// 滑块滑动中实时显示 (onSliderChanging)
 function onSliderChanging(val) {
   offValInfo = parseInt(val, 10);
   offValText.innerText = (offValInfo / 10).toFixed(1) + " V";
 }
 
-// 通电按键 (onBtn1Clicked)
-function onBtn1Clicked() {
+function onPowerOnClicked() {
   allowSend = false;
   tx[3] = 163;
   tx[4] = 8;
@@ -877,8 +854,7 @@ function onBtn1Clicked() {
   sendData();
 }
 
-// 震动控制按键 (onBtn2Clicked)
-function onBtn2Clicked() {
+function onSwayClicked() {
   allowSend = false;
   tx[3] = 163;
   tx[4] = 4;
@@ -887,8 +863,7 @@ function onBtn2Clicked() {
   sendData();
 }
 
-// 断电按键 (onBtn3Clicked)
-function onBtn3Clicked() {
+function onPowerOffClicked() {
   allowSend = false;
   tx[3] = 163;
   tx[4] = 2;
@@ -897,22 +872,21 @@ function onBtn3Clicked() {
   sendData();
 }
 
-// 监听控件交互事件
 chkAutoOff.addEventListener('change', (e) => onIsAutoDisChange(e.target.checked));
 chkAutoOn.addEventListener('change', (e) => onIsAutoOnChange(e.target.checked));
 sliderOffVal.addEventListener('input', (e) => onSliderChanging(e.target.value));
 sliderOffVal.addEventListener('change', (e) => onSliderChanged(e.target.value));
 
-btn1.addEventListener('click', onBtn1Clicked);
-btn2.addEventListener('click', onBtn2Clicked);
-btn3.addEventListener('click', onBtn3Clicked);
+btnPowerOn.addEventListener('click', onPowerOnClicked);
+btnSway.addEventListener('click', onSwayClicked);
+btnPowerOff.addEventListener('click', onPowerOffClicked);
 
-// ==================== 数据接收与握手解析 (processData) ====================
+// Handle Incoming BLE Notifications
 function processData(rx) {
   const cmd = rx[3];
 
   switch (cmd) {
-    case cmdAskMode: // 167 握手
+    case cmdAskMode: // 167 handshake
       if (rx[4] === 170) {
         curMode = rx[2];
         tx[4] = 187;
@@ -935,11 +909,9 @@ function processData(rx) {
         isAutoPowerOff = rx[10] === 1;
         startCur = (rx[12] << 8) | rx[13];
 
-        // 实时电流（符号位 + 保持原始数值，updateScreen 时除以 100）
         let rawCur = (rx[14] << 8) | rx[15];
         curCur = (rawCur & 0x8000) ? -1 * (rawCur & 0x7FFF) : (rawCur & 0x7FFF);
 
-        // 实时温度（16位补码，updateScreen 时除以 10）
         let rawTemp = (rx[17] << 8) | rx[18];
         if (rawTemp & 0x8000) rawTemp -= 65536;
         temperature = rawTemp;
@@ -951,18 +923,14 @@ function processData(rx) {
       }
       break;
 
-    case cmdIdle: // 0 周期轮询
+    case cmdIdle: // 0 periodic poll
       if (!keepFlag) {
-        tx[3] = 1; // 交替拉取启动电压
+        tx[3] = 1;
       }
       updateCnt++;
       if (updateCnt >= 5) {
         curVal = (rx[5] << 8) | rx[6];
-        if (curVal < 180) {
-          volPro = Math.floor(((curVal - 100) / 40) * 100);
-        } else {
-          volPro = Math.floor(((curVal - 180) / 80) * 100);
-        }
+        volPro = Math.floor(curVal < 180 ? ((curVal - 100) / 40) * 100 : ((curVal - 180) / 80) * 100);
         updateCnt = 0;
 
         let rawTemp = (rx[17] << 8) | rx[18];
@@ -987,29 +955,24 @@ function processData(rx) {
       updateScreen();
       break;
 
-    case 1: // 响应查询启动电压
+    case 1:
       startVolTmp = (rx[5] << 8) | rx[6];
-      if (!keepFlag) {
-        tx[3] = cmdIdle;
-      }
+      if (!keepFlag) tx[3] = cmdIdle;
       break;
 
-    case 161: // cmdSetParam 反馈
+    case 161:
       if (tx[3] === 161) {
         allowSend = true;
         tx[3] = cmdIdle;
       }
       break;
 
-    case 163: // 控制按键反馈
-      if (tx[3] === 163) {
-        tx[3] = cmdIdle;
-      }
+    case 163:
+      if (tx[3] === 163) tx[3] = cmdIdle;
       break;
   }
 }
 
-// 轮询心跳定时器
 function startPolling() {
   clearInterval(pollTimer);
   pollTimer = setInterval(async () => {
@@ -1017,57 +980,57 @@ function startPolling() {
     try {
       await writeChar.writeValueWithoutResponse(tx);
     } catch (e) {
-      console.warn('轮询发包异常:', e);
+      console.warn('Polling error:', e);
     }
   }, 1000);
 }
 
-// ==================== 蓝牙连接与断开流程 ====================
+async function connectToGatt(device) {
+  currentDevice = device;
+  bleStatus.innerText = `${device.name || 'RIEIEK'} (GATT...)`;
+
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService(SER_UUID);
+  const readChar = await service.getCharacteristic(R_UUID);
+  writeChar = await service.getCharacteristic(W_UUID);
+
+  await readChar.startNotifications();
+  readChar.addEventListener('characteristicvaluechanged', (event) => {
+    const rx = new Uint8Array(event.target.value.buffer);
+    if (rx.length < 20 || rx[0] !== 0xAA || rx[1] !== 0x55 || rx[19] !== 0x88) return;
+    processData(rx);
+  });
+
+  bleStatus.innerText = disInfo.statusConnected;
+  btnConnect.style.display = "none";
+  btnDisconnect.style.display = "block";
+  dataCard.style.display = "block";
+  settingCard.style.display = "block";
+  bottomActionBar.style.display = "block";
+
+  setTimeout(() => {
+    allowSend = true;
+    tx[3] = cmdAskMode;
+    tx[4] = 170;
+    sendData();
+    startPolling();
+  }, 800);
+
+  device.addEventListener('gattserverdisconnected', onDisconnected);
+}
+
+// Direct Scan & Connect
 btnConnect.addEventListener('click', async () => {
   try {
-    bleStatus.innerText = disInfo.a3; // 正在连接 / Connecting
+    bleStatus.innerText = disInfo.statusConnecting;
     const device = await navigator.bluetooth.requestDevice({
       filters: [{ namePrefix: 'RIEIEK' }],
       optionalServices: [SER_UUID]
     });
-    currentDevice = device;
-
-    bleStatus.innerText = `${device.name || 'RIEIEK'} (GATT...)`;
-    const server = await device.gatt.connect();
-
-    const service = await server.getPrimaryService(SER_UUID);
-    const readChar = await service.getCharacteristic(R_UUID);
-    writeChar = await service.getCharacteristic(W_UUID);
-
-    // 订阅通知
-    await readChar.startNotifications();
-    readChar.addEventListener('characteristicvaluechanged', (event) => {
-      const rx = new Uint8Array(event.target.value.buffer);
-      if (rx.length < 20 || rx[0] !== 0xAA || rx[1] !== 0x55 || rx[19] !== 0x88) return;
-      processData(rx);
-    });
-
-    bleStatus.innerText = disInfo.b7; // 已连接 / Connected
-    btnConnect.style.display = "none";
-    btnDisconnect.style.display = "block";
-    dataCard.style.display = "block";
-    settingCard.style.display = "block";
-    bottomActionBar.style.display = "block";
-
-    // 启动握手流程 (800ms)
-    setTimeout(() => {
-      allowSend = true;
-      tx[3] = cmdAskMode; // 167
-      tx[4] = 170;
-      sendData();
-      startPolling();
-    }, 800);
-
-    device.addEventListener('gattserverdisconnected', onDisconnected);
-
+    await connectToGatt(device);
   } catch (error) {
-    bleStatus.innerText = disInfo.b6 + ": " + error.message;
-    console.warn("连接错误:", error);
+    bleStatus.innerText = disInfo.statusFailed + ": " + error.message;
+    console.warn("Connection error:", error);
   }
 });
 
@@ -1080,8 +1043,8 @@ btnDisconnect.addEventListener('click', () => {
 });
 
 function onDisconnected() {
-  bleStatus.innerText = disInfo.b2; // 蓝牙连接已断开
-  powerStatus.innerText = disInfo.a5; // 断开
+  bleStatus.innerText = disInfo.statusDisconnected;
+  powerStatus.innerText = disInfo.stateOff;
   btnConnect.style.display = "block";
   btnConnect.disabled = false;
   btnDisconnect.style.display = "none";
@@ -1093,8 +1056,8 @@ function onDisconnected() {
   writeChar = null;
 }
 
-// 初始化语言与界面
-applyLanguage();
+// Initialize UI and check language
+applyLanguage(currentLang);
 </script>
 </body>
 </html>

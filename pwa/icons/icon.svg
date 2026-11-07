@@ -1,14 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0a84ff"/>
-      <stop offset="100%" stop-color="#0055d4"/>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#007aff"/>
+      <stop offset="100%" stop-color="#0051c7"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
-  <!-- Power Icon -->
-  <path d="M256 100 V 230" stroke="#ffffff" stroke-width="36" stroke-linecap="round"/>
-  <path d="M165 160 A 130 130 0 1 0 347 160" fill="none" stroke="#ffffff" stroke-width="36" stroke-linecap="round"/>
-  <!-- Bluetooth symbol in center -->
-  <path d="M236 290 L276 325 L256 345 L256 265 L276 285 L236 320" fill="none" stroke="#64d2ff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- App Background -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)"/>
+
+  <!-- 1. Large Car Silhouette (Centered Horizontally, Width ~84%) -->
+  <path d="M 42 220 Q 48 185 80 162 L 165 150 L 225 100 L 330 100 L 395 148 L 442 162 Q 470 185 470 220 L 440 220 Q 415 242 350 242 Q 325 220 185 220 Q 160 242 95 242 Q 70 220 42 220 Z" fill="#ffffff" fill-opacity="0.95"/>
+  <!-- Car Windows -->
+  <path d="M 175 152 L 228 108 L 324 108 L 382 152 Z" fill="#0051c7"/>
+  <line x1="275" y1="108" x2="275" y2="152" stroke="#ffffff" stroke-width="5"/>
+  <!-- Wheels -->
+  <circle cx="130" cy="226" r="38" fill="#1e293b" stroke="#ffffff" stroke-width="5"/>
+  <circle cx="130" cy="226" r="16" fill="#94a3b8"/>
+  <circle cx="380" cy="226" r="38" fill="#1e293b" stroke="#ffffff" stroke-width="5"/>
+  <circle cx="380" cy="226" r="16" fill="#94a3b8"/>
+  <!-- Lights -->
+  <rect x="44" y="188" width="14" height="14" rx="3" fill="#ffd60a"/>
+  <rect x="456" y="188" width="12" height="14" rx="3" fill="#ff453a"/>
+
+  <!-- 2. Translucent Battery Housing Overlay -->
+  <!-- Terminals -->
+  <rect x="194" y="286" width="32" height="16" rx="4" fill="#ffffff" fill-opacity="0.9"/>
+  <rect x="286" y="286" width="32" height="16" rx="4" fill="#ffffff" fill-opacity="0.9"/>
+  <!-- Battery Body -->
+  <rect x="168" y="300" width="176" height="130" rx="18" fill="#0a193c" fill-opacity="0.82" stroke="#ffffff" stroke-width="5"/>
+  <!-- Polarity Marks (+ and -) -->
+  <line x1="193" y1="326" x2="207" y2="326" stroke="#ff453a" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="200" y1="319" x2="200" y2="333" stroke="#ff453a" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="312" y1="326" x2="326" y2="326" stroke="#64d2ff" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- 3. Power Switch Symbol (Standard IEC 60417-5009) -->
+  <!-- Bottom/Side Arc with opening at top -->
+  <path d="M 280 349 A 34 34 0 1 1 232 349" fill="none" stroke="#ffd60a" stroke-width="8" stroke-linecap="round"/>
+  <!-- Vertical Cut Line (Thick rounded rectangle, enters through top opening into center) -->
+  <rect x="252" y="325" width="8" height="46" rx="4" fill="#ffd60a"/>
 </svg>
