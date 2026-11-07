@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RIEIEK 设备监控仪表盘</title>
+  
+  <!-- PWA & 移动端相关元数据 -->
+  <meta name="theme-color" content="#007aff">
+  <meta name="description" content="RIEIEK 蓝牙设备离线监控仪表盘">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="RIEIEK">
+  
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      padding: 16px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
+      background: #f4f6f8;
+      color: #333;
+      max-width: 540px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 4px 2px;
+    }
+    .app-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1c1c1e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .app-title svg {
+      width: 24px;
+      height: 24px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: 500;
+      gap: 5px;
+    }
+    .badge-online { background: #e3f9e5; color: #1e7e34; }
+    .badge-offline { background: #fee2e2; color: #dc2626; }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .btn {
+      background: #007aff;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      width: 100%;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:active { opacity: 0.85; }
+    .btn:disabled { background: #b0c4de; cursor: not-allowed; opacity: 1; }
+    .btn-secondary {
+      background: #e5e5ea;
+      color: #1c1c1e;
+      margin-top: 10px;
+    }
+    .btn-install {
+      background: #34c759;
+      color: white;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .status-text {
+      margin-top: 12px;
+      color: #666;
+      font-size: 14px;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f2;
+    }
+    .metric:last-child { border-bottom: none; }
+    .metric-label { font-size: 15px; color: #555; }
+    .val { font-weight: 700; font-size: 1.15em; color: #1c1c1e; }
+    .warning-box {
+      background: #fff8e6;
+      border: 1px solid #ffeeba;
+      color: #856404;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 16px;
+      display: none;
+    }
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: #8e8e93;
+      margin-top: 24px;
+      padding-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="app-title">
+      <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="512" height="512" rx="115" fill="#007aff"/>
+        <path d="M256 100 V 230" stroke="#ffffff" stroke-width="36" stroke-linecap="round"/>
+        <path d="M165 160 A 130 130 0 1 0 347 160" stroke="#ffffff" stroke-width="36" stroke-linecap="round"/>
+        <path d="M236 290 L276 325 L256 345 L256 265 L276 285 L236 320" stroke="#64d2ff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>RIEIEK 控制台</span>
+    </div>
+    <div id="netBadge" class="badge badge-online">
+      <span class="badge-dot"></span>
+      <span id="netText">在线</span>
+    </div>
+  </header>
+
+  <div id="browserWarning" class="warning-box"></div>
+
+  <!-- PWA 安装提示按钮 -->
+  <button id="btnInstall" class="btn btn-install">
+    📲 安装应用到主屏幕 (支持离线使用)
+  </button>
+
+  <div class="card">
+    <button id="btnConnect" class="btn">扫描并连接设备</button>
+    <button id="btnDisconnect" class="btn btn-secondary" style="display: none;">断开连接</button>
+    <p id="status" class="status-text">状态: 未连接</p>
+  </div>
+
+  <div class="card" id="dataCard" style="display: none;">
+    <div class="metric"><span class="metric-label">电量百分比</span><span class="val" id="volPro">-- %</span></div>
+    <div class="metric"><span class="metric-label">当前电流</span><span class="val" id="current">-- A</span></div>
+    <div class="metric"><span class="metric-label">设备温度</span><span class="val" id="temp">-- ℃</span></div>
+    <div class="metric"><span class="metric-label">电源状态</span><span class="val" id="powerStatus">--</span></div>
+    <div class="metric"><span class="metric-label">无感启动</span><span class="val" id="autoOn">--</span></div>
+    <div class="metric"><span class="metric-label">自动断电</span><span class="val" id="autoOff">--</span></div>
+  </div>
+
+  <footer>
+    RIEIEK PWA &bull; 支持断网离线打开与 Web 蓝牙通信
+  </footer>
+
+<script>
+// ==================== PWA Service Worker 注册与离线检测 ====================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => {
+        console.log('ServiceWorker 注册成功, 作用域:', reg.scope);
+      })
+      .catch((err) => {
+        console.warn('ServiceWorker 注册失败:', err);
+      });
+  });
+}
+
+// 离线/在线状态监控
+function updateNetworkStatus() {
+  const isOnline = navigator.onLine;
+  const badge = document.getElementById('netBadge');
+  const text = document.getElementById('netText');
+  if (isOnline) {
+    badge.className = 'badge badge-online';
+    text.innerText = '在线';
+  } else {
+    badge.className = 'badge badge-offline';
+    text.innerText = '离线模式';
+  }
+}
+window.addEventListener('online', updateNetworkStatus);
+window.addEventListener('offline', updateNetworkStatus);
+updateNetworkStatus();
+
+// PWA 安装事件捕获
+let deferredPrompt = null;
+const btnInstall = document.getElementById('btnInstall');
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  btnInstall.style.display = 'flex';
+});
+
+btnInstall.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  console.log(`PWA 安装选择: ${outcome}`);
+  deferredPrompt = null;
+  btnInstall.style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  btnInstall.style.display = 'none';
+  console.log('PWA 已成功安装到设备');
+});
+
+// 环境检查：Web Bluetooth 与 HTTPS
+(function checkEnvironment() {
+  const warning = document.getElementById('browserWarning');
+  if (!navigator.bluetooth) {
+    warning.style.display = 'block';
+    warning.innerHTML = '⚠️ 当前浏览器环境不支持 <strong>Web Bluetooth API</strong>。<br>推荐使用 <strong>Chrome、Edge</strong> 或 Android 版 Chrome 访问；iOS 环境请配合 WebBLE 专属浏览器使用。';
+  } else if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+    warning.style.display = 'block';
+    warning.innerHTML = '⚠️ Web Bluetooth 和 Service Worker 必须在 <strong>HTTPS</strong> 安全上下文或 localhost 下工作。托管到 GitHub Pages 时将自动支持 HTTPS。';
+  }
+})();
+
+// ==================== 蓝牙控制核心逻辑 ====================
+const SER_UUID = "0000fff0-0000-1000-8000-00805f9b34fb";
+const R_UUID   = "0000fff1-0000-1000-8000-00805f9b34fb";
+const W_UUID   = "0000fff2-0000-1000-8000-00805f9b34fb";
+
+let currentDevice = null;
+let writeChar = null;
+let pollTimer = null;
+let tx = new Uint8Array([170, 85, 0, 167, 170, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 136]);
+
+const btnConnect = document.getElementById('btnConnect');
+const btnDisconnect = document.getElementById('btnDisconnect');
+const statusEl = document.getElementById('status');
+const dataCard = document.getElementById('dataCard');
+
+btnConnect.addEventListener('click', async () => {
+  try {
+    statusEl.innerText = "状态: 正在唤起系统蓝牙扫描...";
+    // 1. 请求设备
+    const device = await navigator.bluetooth.requestDevice({
+      filters: [{ namePrefix: 'RIEIEK' }],
+      optionalServices: [SER_UUID]
+    });
+    currentDevice = device;
+
+    statusEl.innerText = `状态: 发现 ${device.name || '设备'}，正在连接 GATT...`;
+    const server = await device.gatt.connect();
+
+    // 2. 获取服务与特征
+    const service = await server.getPrimaryService(SER_UUID);
+    const readChar = await service.getCharacteristic(R_UUID);
+    writeChar = await service.getCharacteristic(W_UUID);
+
+    // 3. 订阅通知
+    await readChar.startNotifications();
+    readChar.addEventListener('characteristicvaluechanged', handleNotifications);
+
+    statusEl.innerText = "状态: 已连接，开始握手与数据同步...";
+    dataCard.style.display = "block";
+    btnConnect.style.display = "none";
+    btnDisconnect.style.display = "block";
+
+    // 4. 800ms 握手发包并启动 1秒轮询定时器
+    setTimeout(sendHandshake, 800);
+    clearInterval(pollTimer);
+    pollTimer = setInterval(sendPoll, 1000);
+
+    device.addEventListener('gattserverdisconnected', onDisconnected);
+
+  } catch (error) {
+    statusEl.innerText = "提示: " + error.message;
+  }
+});
+
+btnDisconnect.addEventListener('click', () => {
+  if (currentDevice && currentDevice.gatt.connected) {
+    currentDevice.gatt.disconnect();
+  } else {
+    onDisconnected();
+  }
+});
+
+function onDisconnected() {
+  statusEl.innerText = "状态: 已断开连接";
+  btnConnect.style.display = "block";
+  btnConnect.disabled = false;
+  btnDisconnect.style.display = "none";
+  clearInterval(pollTimer);
+  pollTimer = null;
+}
+
+async function sendHandshake() {
+  if (!writeChar) return;
+  tx[3] = 167; // cmdAskMode
+  tx[4] = 170; // 0xAA
+  try {
+    await writeChar.writeValueWithoutResponse(tx);
+  } catch (e) {
+    console.warn('握手写入失败', e);
+  }
+}
+
+async function sendPoll() {
+  if (!writeChar) return;
+  try {
+    await writeChar.writeValueWithoutResponse(tx);
+  } catch (e) {
+    console.warn('轮询写入失败', e);
+  }
+}
+
+function handleNotifications(event) {
+  const rx = new Uint8Array(event.target.value.buffer);
+  if (rx.length < 20 || rx[0] !== 0xAA || rx[1] !== 0x55) return;
+
+  // 握手状态推进
+  if (rx[3] === 167) {
+    if (rx[4] === 170) {
+      tx[4] = 187; // 切换下一步握手
+      return;
+    } else if (rx[4] === 187) {
+      tx[3] = 0;   // 切换为 cmdIdle (基础轮询)
+    }
+  }
+
+  // 电压与百分比换算
+  const curVal = (rx[5] << 8) | rx[6];
+  let volPro = curVal < 180 ? ((curVal - 100) / 40) * 100 : ((curVal - 180) / 80) * 100;
+  volPro = Math.max(0, Math.min(100, Math.floor(volPro)));
+  document.getElementById('volPro').innerText = volPro + " %";
+
+  // 电流换算 (符号位判断)
+  const rawCur = (rx[14] << 8) | rx[15];
+  const cur = (rawCur & 0x8000) ? -1 * (rawCur & 0x7FFF) : (rawCur & 0x7FFF);
+  document.getElementById('current').innerText = cur + " A";
+
+  // 温度换算 (16 位补码)
+  let temp = (rx[17] << 8) | rx[18];
+  if (temp & 0x8000) temp -= 65536;
+  document.getElementById('temp').innerText = temp + " ℃";
+
+  // 开关与标志
+  document.getElementById('powerStatus').innerText = rx[16] === 1 ? "已通电" : "已关断";
+  document.getElementById('autoOn').innerText = rx[9] === 1 ? "开" : "关";
+  document.getElementById('autoOff').innerText = rx[10] === 1 ? "开" : "关";
+}
+</script>
+</body>
+</html>

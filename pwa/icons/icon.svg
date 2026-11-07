@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a84ff"/>
+      <stop offset="100%" stop-color="#0055d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
+  <!-- Power Icon -->
+  <path d="M256 100 V 230" stroke="#ffffff" stroke-width="36" stroke-linecap="round"/>
+  <path d="M165 160 A 130 130 0 1 0 347 160" fill="none" stroke="#ffffff" stroke-width="36" stroke-linecap="round"/>
+  <!-- Bluetooth symbol in center -->
+  <path d="M236 290 L276 325 L256 345 L256 265 L276 285 L236 320" fill="none" stroke="#64d2ff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
